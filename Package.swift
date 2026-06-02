@@ -22,7 +22,7 @@ let package = Package(
         .library(name: "RFC 6238", targets: ["RFC 6238"])
     ],
     dependencies: [
-        .package(path: "../../swift-primitives/swift-dependency-primitives"),
+        .package(url: "https://github.com/swift-primitives/swift-dependency-primitives.git", branch: "main"),
     ],
     targets: [
         .target(
