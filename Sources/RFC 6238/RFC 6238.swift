@@ -5,6 +5,7 @@
 // Pure Swift implementation with no Foundation dependencies.
 
 public import Dependency_Primitives
+import ASCII_Primitives
 
 /// Implementation of RFC 6238: TOTP: Time-Based One-Time Password Algorithm
 ///
@@ -419,11 +420,11 @@ private func percentEncode(_ string: Swift.String) -> Swift.String {
 }
 
 private func hexChar(_ nibble: UInt8) -> Character {
-    let chars: [Character] = [
-        "0", "1", "2", "3", "4", "5", "6", "7",
-        "8", "9", "A", "B", "C", "D", "E", "F",
-    ]
-    return chars[Int(nibble)]
+    // Delegates the uppercase hex nibble->digit mapping to the L1 single-byte
+    // ASCII primitive. `nibble` is always masked to 0-15 at the call sites
+    // (`byte >> 4`, `byte & 0x0F`), so the result is non-nil; the force-unwrap
+    // preserves the original table's trap-on-out-of-domain behavior exactly.
+    Character(UnicodeScalar(ASCII.Serialization.hexDigitUppercase(nibble)!))
 }
 
 // MARK: - Base32 (RFC 4648)

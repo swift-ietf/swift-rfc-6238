@@ -23,12 +23,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swift-primitives/swift-dependency-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-ascii-primitives.git", branch: "main"),
     ],
     targets: [
         .target(
             name: "RFC 6238",
             dependencies: [
                 .product(name: "Dependency Primitives", package: "swift-dependency-primitives"),
+                .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
             ]
         ),
         .testTarget(
