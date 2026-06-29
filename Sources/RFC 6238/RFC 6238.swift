@@ -424,7 +424,7 @@ private func hexChar(_ nibble: UInt8) -> Character {
     // ASCII primitive. `nibble` is always masked to 0-15 at the call sites
     // (`byte >> 4`, `byte & 0x0F`), so the result is non-nil; the force-unwrap
     // preserves the original table's trap-on-out-of-domain behavior exactly.
-    Character(UnicodeScalar(ASCII.Serialization.hexDigitUppercase(nibble)!))
+    Character(UnicodeScalar(ASCII.Hexadecimal.code(nibble, case: .upper)!))
 }
 
 // MARK: - Base32 (RFC 4648)
