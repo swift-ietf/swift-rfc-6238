@@ -1,6 +1,6 @@
 # Swift RFC 6238
 
-[![CI](https://github.com/swift-standards/swift-rfc-6238/workflows/CI/badge.svg)](https://github.com/swift-standards/swift-rfc-6238/actions/workflows/ci.yml)
+[![CI](https://github.com/swift-ietf/swift-rfc-6238/workflows/CI/badge.svg)](https://github.com/swift-ietf/swift-rfc-6238/actions/workflows/ci.yml)
 ![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
 
 Swift implementation of RFC 6238: TOTP - Time-Based One-Time Password Algorithm and RFC 4226: HOTP - HMAC-Based One-Time Password Algorithm.
@@ -26,7 +26,7 @@ Add swift-rfc-6238 to your package dependencies:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-standards/swift-rfc-6238.git", from: "0.1.0")
+    .package(url: "https://github.com/swift-ietf/swift-rfc-6238.git", from: "0.2.4")
 ]
 ```
 
