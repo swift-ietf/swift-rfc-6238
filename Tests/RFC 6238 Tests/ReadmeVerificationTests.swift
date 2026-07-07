@@ -21,17 +21,20 @@ struct `README Verification` {
                 switch algorithm {
                 case .sha1:
                     let mac = HMAC<Insecure.SHA1>.authenticationCode(
-                        for: data, using: symmetricKey
+                        for: data,
+                        using: symmetricKey
                     )
                     return Array(mac)
                 case .sha256:
                     let mac = HMAC<SHA256>.authenticationCode(
-                        for: data, using: symmetricKey
+                        for: data,
+                        using: symmetricKey
                     )
                     return Array(mac)
                 case .sha512:
                     let mac = HMAC<SHA512>.authenticationCode(
-                        for: data, using: symmetricKey
+                        for: data,
+                        using: symmetricKey
                     )
                     return Array(mac)
                 }
@@ -58,7 +61,8 @@ struct `README Verification` {
             )
 
             let hmacProvider = CryptoKitHMACProvider()
-            let now = Double(ContinuousClock.now.duration(to: .now).components.seconds)
+            let now =
+                Double(ContinuousClock.now.duration(to: .now).components.seconds)
                 + 978_307_200  // Approximate unix time
             let otp = totp.generate(at: 1_111_111_111, using: hmacProvider)
 

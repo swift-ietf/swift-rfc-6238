@@ -4,8 +4,8 @@
 // Implementation of RFC 6238: TOTP: Time-Based One-Time Password Algorithm
 // Pure Swift implementation with no Foundation dependencies.
 
-public import Dependency_Primitives
 import ASCII_Primitives
+public import Dependency_Primitives
 
 /// Implementation of RFC 6238: TOTP: Time-Based One-Time Password Algorithm
 ///
@@ -101,7 +101,10 @@ public enum RFC_6238 {
         ///   - unixTime: Unix timestamp in seconds since epoch
         ///   - hmacProvider: The HMAC provider implementation
         /// - Returns: The generated OTP as a string with leading zeros if necessary
-        public func generate(at unixTime: Double, using hmacProvider: any HMACProvider) -> Swift.String {
+        public func generate(
+            at unixTime: Double,
+            using hmacProvider: any HMACProvider
+        ) -> Swift.String {
             let counter = self.counter(at: unixTime)
             let hotp = HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
             return hotp.generate(counter: counter, using: hmacProvider)
@@ -148,7 +151,10 @@ public enum RFC_6238 {
         ///   - label: The account label (e.g., "user@example.com")
         ///   - issuer: The service issuer (e.g., "Example Corp")
         /// - Returns: The otpauth URI string
-        public func provisioningURI(label: Swift.String, issuer: Swift.String? = nil) -> Swift.String {
+        public func provisioningURI(
+            label: Swift.String,
+            issuer: Swift.String? = nil
+        ) -> Swift.String {
             let encodedLabel = percentEncode(label)
             var uri = "otpauth://totp/\(encodedLabel)"
             uri += "?secret=\(Base32.encode(secret))"
@@ -214,7 +220,8 @@ public enum RFC_6238 {
         ///   - counter: The counter value
         ///   - hmacProvider: The HMAC provider implementation
         /// - Returns: The generated OTP as a string with leading zeros if necessary
-        public func generate(counter: UInt64, using hmacProvider: any HMACProvider) -> Swift.String {
+        public func generate(counter: UInt64, using hmacProvider: any HMACProvider) -> Swift.String
+        {
             // Convert counter to big-endian bytes
             let counterBytes: [UInt8] = unsafe withUnsafeBytes(of: counter.bigEndian) { Array($0) }
 
@@ -325,24 +332,24 @@ extension RFC_6238.HMAC: Dependency.Key {
     public typealias Value = RFC_6238.HMAC
 
     #if canImport(CryptoKit)
-    public static var liveValue: RFC_6238.HMAC {
-        RFC_6238.HMAC { algorithm, key, data in
-            // Platform-specific: use CryptoKit HMAC
-            fatalError(
-                "RFC_6238.HMAC.liveValue: CryptoKit HMAC integration required. "
-                + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
-            )
+        public static var liveValue: RFC_6238.HMAC {
+            RFC_6238.HMAC { _, _, _ in
+                // Platform-specific: use CryptoKit HMAC
+                fatalError(
+                    "RFC_6238.HMAC.liveValue: CryptoKit HMAC integration required. "
+                        + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
+                )
+            }
         }
-    }
     #else
-    public static var liveValue: RFC_6238.HMAC {
-        RFC_6238.HMAC { _, _, _ in
-            fatalError(
-                "RFC_6238.HMAC.liveValue unavailable on this platform. "
-                + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
-            )
+        public static var liveValue: RFC_6238.HMAC {
+            RFC_6238.HMAC { _, _, _ in
+                fatalError(
+                    "RFC_6238.HMAC.liveValue unavailable on this platform. "
+                        + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
+                )
+            }
         }
-    }
     #endif
 
     public static var testValue: RFC_6238.HMAC {
@@ -401,11 +408,11 @@ private func percentEncode(_ string: Swift.String) -> Swift.String {
     var result = ""
     for scalar in string.unicodeScalars {
         if scalar.isASCII,
-           (scalar.value >= 0x41 && scalar.value <= 0x5A)   // A-Z
-            || (scalar.value >= 0x61 && scalar.value <= 0x7A) // a-z
-            || (scalar.value >= 0x30 && scalar.value <= 0x39) // 0-9
-            || scalar == "-" || scalar == "_" || scalar == "." || scalar == "~"
-            || scalar == "@"  // safe in otpauth label
+            (scalar.value >= 0x41 && scalar.value <= 0x5A)  // A-Z
+                || (scalar.value >= 0x61 && scalar.value <= 0x7A)  // a-z
+                || (scalar.value >= 0x30 && scalar.value <= 0x39)  // 0-9
+                || scalar == "-" || scalar == "_" || scalar == "." || scalar == "~"
+                || scalar == "@"  // safe in otpauth label
         {
             result.append(Character(scalar))
         } else {
@@ -518,7 +525,12 @@ extension RFC_6238.TOTP {
         at unixTime: Double,
         window: Int = 1
     ) -> Bool {
-        validate(otp, at: unixTime, window: window, using: Dependency.Scope.current[RFC_6238.HMAC.self])
+        validate(
+            otp,
+            at: unixTime,
+            window: window,
+            using: Dependency.Scope.current[RFC_6238.HMAC.self]
+        )
     }
 }
 
