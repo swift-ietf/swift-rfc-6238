@@ -15,30 +15,6 @@ struct `README Verification` {
 
     #if canImport(CryptoKit)
         struct CryptoKitHMACProvider: RFC_6238.HMACProvider {
-            func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
-                let symmetricKey = SymmetricKey(data: key)
-
-                switch algorithm {
-                case .sha1:
-                    let mac = HMAC<Insecure.SHA1>.authenticationCode(
-                        for: data,
-                        using: symmetricKey
-                    )
-                    return Array(mac)
-                case .sha256:
-                    let mac = HMAC<SHA256>.authenticationCode(
-                        for: data,
-                        using: symmetricKey
-                    )
-                    return Array(mac)
-                case .sha512:
-                    let mac = HMAC<SHA512>.authenticationCode(
-                        for: data,
-                        using: symmetricKey
-                    )
-                    return Array(mac)
-                }
-            }
         }
 
         @Test
@@ -201,3 +177,32 @@ struct `README Verification` {
         }
     }
 }
+
+#if canImport(CryptoKit)
+    extension `README Verification`.CryptoKitHMACProvider {
+        func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
+            let symmetricKey = SymmetricKey(data: key)
+
+            switch algorithm {
+            case .sha1:
+                let mac = HMAC<Insecure.SHA1>.authenticationCode(
+                    for: data,
+                    using: symmetricKey
+                )
+                return Array(mac)
+            case .sha256:
+                let mac = HMAC<SHA256>.authenticationCode(
+                    for: data,
+                    using: symmetricKey
+                )
+                return Array(mac)
+            case .sha512:
+                let mac = HMAC<SHA512>.authenticationCode(
+                    for: data,
+                    using: symmetricKey
+                )
+                return Array(mac)
+            }
+        }
+    }
+#endif

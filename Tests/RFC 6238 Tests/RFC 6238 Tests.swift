@@ -13,100 +13,6 @@ struct `RFC 6238 Tests` {
     /// Mock HMAC provider for testing without crypto dependencies
     /// Uses test vectors from RFC 6238 Appendix B
     struct TestHMACProvider: RFC_6238.HMACProvider {
-        func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
-            let testSecret20 = Array("12345678901234567890".utf8)
-            let testSecret32 = Array("12345678901234567890123456789012".utf8)
-            let testSecret64 = Array(
-                "1234567890123456789012345678901234567890123456789012345678901234".utf8
-            )
-
-            if key == testSecret20 && algorithm == .sha1 {
-                switch hexString(data) {
-                case "0000000000000001":
-                    return hexBytes("75a48a19d4cbe100644e8ac1397eea747a2d33ab")!
-                case "00000000023523ec":
-                    return hexBytes("278c02e53610f84c40bd9135acd4101012410a14")!
-                case "00000000023523ed":
-                    return hexBytes("b0092b21d048af209da0a1ddd498ade8a79487ed")!
-                case "00000000023523ee":
-                    return hexBytes("1c305c9694851807300bc28967778ed3db135a74")!
-                case "000000000273ef07":
-                    return hexBytes("907cd1a9116564ecb9d5d1780325f246173fe703")!
-                case "0000000003f940aa":
-                    return hexBytes("25a326d31fc366244cad054976020c7b56b13d5f")!
-                case "0000000027bc86aa":
-                    return hexBytes("ab07e97e2c1278769dbcd75783aabde75ed8550a")!
-                default:
-                    break
-                }
-            }
-
-            if key == testSecret32 && algorithm == .sha256 {
-                switch hexString(data) {
-                case "0000000000000001":
-                    return hexBytes(
-                        "392514c9dd4165d4709456062c78e04e16e68718515951333bdb8b26caa3053c"
-                    )!
-                case "00000000023523ec":
-                    return hexBytes(
-                        "4eed729864525d771326c6049bc885629fb8813ebb417e5704df02358793f056"
-                    )!
-                case "00000000023523ed":
-                    return hexBytes(
-                        "cb48f7ef5cd98f6d7bfcb31ae7458ff692a015776205de7e1abfff29d6d48a9d"
-                    )!
-                case "000000000273ef07":
-                    return hexBytes(
-                        "3befb8821caef9df4e05790da0966163f4e38feee7f71fcd289c3de48d3486d9"
-                    )!
-                case "0000000003f940aa":
-                    return hexBytes(
-                        "a4e8eabbe549adfa65408945a9282cb93f394f06c0d4f122260963641bc3abe2"
-                    )!
-                case "0000000027bc86aa":
-                    return hexBytes(
-                        "1363cc0ee3557f092e5b55ea3ddb06bcd20f063ce393ccf670059e3ca44941f8"
-                    )!
-                default:
-                    break
-                }
-            }
-
-            if key == testSecret64 && algorithm == .sha512 {
-                switch hexString(data) {
-                case "0000000000000001":
-                    return hexBytes(
-                        "6f76f324230cefda1d3f65309a0badb36efce9528ada64967d71e4e9d74c4aa37fe7650f931ab86ddccc2d38962d720ee626a20feb311b485a92e3bb0796df28"
-                    )!
-                case "00000000023523ec":
-                    return hexBytes(
-                        "b3381250260d6a9e811ae58dfa406705e38c804c97528d5a7ed8ee533331f8c43cc3454911ad1d2761f9380170c0b180a657e3a944c796e05d09f2d1630b7505"
-                    )!
-                case "00000000023523ed":
-                    return hexBytes(
-                        "01713ed59e49948a4f0fffb7466baebac66362d90764a5a23df761636e1535c44b635339ec00a789b8ca45cd3d727acd6b995047547f6f68adc6f16a7436c331"
-                    )!
-                case "000000000273ef07":
-                    return hexBytes(
-                        "87d0cfb5d4e968d7d9041a5cf21dd7d460705784004f0244edb98004e6cf9942ace539d621c97dc0fb75f6f10d64af1f09ecae83ea7f1213c7fa187dfaf6b938"
-                    )!
-                case "0000000003f940aa":
-                    return hexBytes(
-                        "129baa738cfa1565a24297237bce282671ff6e261754eb7011e1e75bd2555b326313142a1f9fe2f31d9ce6cc95d3b16a0dee56f2492f2f76885702d98bfadc93"
-                    )!
-                case "0000000027bc86aa":
-                    return hexBytes(
-                        "562298a02af13e7522127adee3dc6678d53669ca2b7016186968f9a9c14f51d1e7098ba91293a01b5f3bab4207a2af5ce332a45f2c2ff2b9885aa42ff61cb426"
-                    )!
-                default:
-                    break
-                }
-            }
-
-            fatalError(
-                "Unknown test vector: key=\(hexString(key)), algorithm=\(algorithm), data=\(hexString(data))"
-            )
-        }
     }
 
     // MARK: - RFC 6238 Test Vectors
@@ -396,6 +302,103 @@ struct `RFC 6238 Tests` {
         #expect(throws: RFC_6238.Error.self) {
             _ = try RFC_6238.HOTP(secret: [UInt8](repeating: 0, count: 20), digits: 9)
         }
+    }
+}
+
+extension `RFC 6238 Tests`.TestHMACProvider {
+    func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
+        let testSecret20 = Array("12345678901234567890".utf8)
+        let testSecret32 = Array("12345678901234567890123456789012".utf8)
+        let testSecret64 = Array(
+            "1234567890123456789012345678901234567890123456789012345678901234".utf8
+        )
+
+        if key == testSecret20 && algorithm == .sha1 {
+            switch hexString(data) {
+            case "0000000000000001":
+                return hexBytes("75a48a19d4cbe100644e8ac1397eea747a2d33ab")!
+            case "00000000023523ec":
+                return hexBytes("278c02e53610f84c40bd9135acd4101012410a14")!
+            case "00000000023523ed":
+                return hexBytes("b0092b21d048af209da0a1ddd498ade8a79487ed")!
+            case "00000000023523ee":
+                return hexBytes("1c305c9694851807300bc28967778ed3db135a74")!
+            case "000000000273ef07":
+                return hexBytes("907cd1a9116564ecb9d5d1780325f246173fe703")!
+            case "0000000003f940aa":
+                return hexBytes("25a326d31fc366244cad054976020c7b56b13d5f")!
+            case "0000000027bc86aa":
+                return hexBytes("ab07e97e2c1278769dbcd75783aabde75ed8550a")!
+            default:
+                break
+            }
+        }
+
+        if key == testSecret32 && algorithm == .sha256 {
+            switch hexString(data) {
+            case "0000000000000001":
+                return hexBytes(
+                    "392514c9dd4165d4709456062c78e04e16e68718515951333bdb8b26caa3053c"
+                )!
+            case "00000000023523ec":
+                return hexBytes(
+                    "4eed729864525d771326c6049bc885629fb8813ebb417e5704df02358793f056"
+                )!
+            case "00000000023523ed":
+                return hexBytes(
+                    "cb48f7ef5cd98f6d7bfcb31ae7458ff692a015776205de7e1abfff29d6d48a9d"
+                )!
+            case "000000000273ef07":
+                return hexBytes(
+                    "3befb8821caef9df4e05790da0966163f4e38feee7f71fcd289c3de48d3486d9"
+                )!
+            case "0000000003f940aa":
+                return hexBytes(
+                    "a4e8eabbe549adfa65408945a9282cb93f394f06c0d4f122260963641bc3abe2"
+                )!
+            case "0000000027bc86aa":
+                return hexBytes(
+                    "1363cc0ee3557f092e5b55ea3ddb06bcd20f063ce393ccf670059e3ca44941f8"
+                )!
+            default:
+                break
+            }
+        }
+
+        if key == testSecret64 && algorithm == .sha512 {
+            switch hexString(data) {
+            case "0000000000000001":
+                return hexBytes(
+                    "6f76f324230cefda1d3f65309a0badb36efce9528ada64967d71e4e9d74c4aa37fe7650f931ab86ddccc2d38962d720ee626a20feb311b485a92e3bb0796df28"
+                )!
+            case "00000000023523ec":
+                return hexBytes(
+                    "b3381250260d6a9e811ae58dfa406705e38c804c97528d5a7ed8ee533331f8c43cc3454911ad1d2761f9380170c0b180a657e3a944c796e05d09f2d1630b7505"
+                )!
+            case "00000000023523ed":
+                return hexBytes(
+                    "01713ed59e49948a4f0fffb7466baebac66362d90764a5a23df761636e1535c44b635339ec00a789b8ca45cd3d727acd6b995047547f6f68adc6f16a7436c331"
+                )!
+            case "000000000273ef07":
+                return hexBytes(
+                    "87d0cfb5d4e968d7d9041a5cf21dd7d460705784004f0244edb98004e6cf9942ace539d621c97dc0fb75f6f10d64af1f09ecae83ea7f1213c7fa187dfaf6b938"
+                )!
+            case "0000000003f940aa":
+                return hexBytes(
+                    "129baa738cfa1565a24297237bce282671ff6e261754eb7011e1e75bd2555b326313142a1f9fe2f31d9ce6cc95d3b16a0dee56f2492f2f76885702d98bfadc93"
+                )!
+            case "0000000027bc86aa":
+                return hexBytes(
+                    "562298a02af13e7522127adee3dc6678d53669ca2b7016186968f9a9c14f51d1e7098ba91293a01b5f3bab4207a2af5ce332a45f2c2ff2b9885aa42ff61cb426"
+                )!
+            default:
+                break
+            }
+        }
+
+        fatalError(
+            "Unknown test vector: key=\(hexString(key)), algorithm=\(algorithm), data=\(hexString(data))"
+        )
     }
 }
 
