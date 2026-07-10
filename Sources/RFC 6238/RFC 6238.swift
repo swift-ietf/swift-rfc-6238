@@ -256,8 +256,10 @@ extension RFC_6238.HOTP {
     ///   - counter: The counter value
     ///   - hmacProvider: The HMAC provider implementation
     /// - Returns: The generated OTP as a string with leading zeros if necessary
-    public func generate(counter: UInt64, using hmacProvider: any RFC_6238.HMACProvider) -> Swift.String
-    {
+    public func generate(
+        counter: UInt64,
+        using hmacProvider: any RFC_6238.HMACProvider
+    ) -> Swift.String {
         // Convert counter to big-endian bytes
         let counterBytes: [UInt8] = unsafe withUnsafeBytes(of: counter.bigEndian) { Array($0) }
 
