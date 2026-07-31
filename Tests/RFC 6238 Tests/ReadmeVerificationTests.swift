@@ -190,12 +190,14 @@ struct `README Verification` {
                     using: symmetricKey
                 )
                 return Array(mac)
+
             case .sha256:
                 let mac = HMAC<SHA256>.authenticationCode(
                     for: data,
                     using: symmetricKey
                 )
                 return Array(mac)
+
             case .sha512:
                 let mac = HMAC<SHA512>.authenticationCode(
                     for: data,
