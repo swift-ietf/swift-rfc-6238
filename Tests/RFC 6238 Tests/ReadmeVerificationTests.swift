@@ -12,6 +12,9 @@ import Testing
 
 @Suite
 struct `README Verification` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 
     #if canImport(CryptoKit)
         struct CryptoKitHMACProvider: RFC_6238.HMACProvider {

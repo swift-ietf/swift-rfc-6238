@@ -7,6 +7,9 @@ import Testing
 
 @Suite
 struct `RFC 6238 Tests` {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
 
     // MARK: - Test HMAC Provider
 
