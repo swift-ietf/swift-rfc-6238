@@ -95,9 +95,9 @@ extension RFC_6238.TOTP {
     ///   - unixTime: Unix timestamp in seconds since epoch
     ///   - hmacProvider: The HMAC provider implementation
     /// - Returns: The generated OTP as a string with leading zeros if necessary
-    public func generate(
+    public func generate<HMACProvider: RFC_6238.HMACProvider>(
         at unixTime: Double,
-        using hmacProvider: any RFC_6238.HMACProvider
+        using hmacProvider: HMACProvider
     ) -> Swift.String {
         let counter = self.counter(at: unixTime)
         let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
@@ -111,11 +111,11 @@ extension RFC_6238.TOTP {
     ///   - window: The number of time steps to check before and after current time (default: 1)
     ///   - hmacProvider: The HMAC provider implementation
     /// - Returns: True if the OTP is valid within the window
-    public func validate(
+    public func validate<HMACProvider: RFC_6238.HMACProvider>(
         _ otp: Swift.String,
         at unixTime: Double,
         window: Int = 1,
-        using hmacProvider: any RFC_6238.HMACProvider
+        using hmacProvider: HMACProvider
     ) -> Bool {
         let currentCounter = counter(at: unixTime)
 
