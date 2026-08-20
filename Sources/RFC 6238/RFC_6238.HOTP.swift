@@ -63,7 +63,7 @@ extension RFC_6238.HOTP {
         using hmacProvider: HMACProvider
     ) -> Swift.String {
         // Convert counter to big-endian bytes
-        let counterBytes: [UInt8] = unsafe withUnsafeBytes(of: counter.bigEndian) { Array($0) }
+        let counterBytes: [UInt8] = withUnsafeBytes(of: counter.bigEndian) { unsafe Array($0) }
 
         // Calculate HMAC
         let hmac = hmacProvider.hmac(algorithm: algorithm, key: secret, data: counterBytes)
