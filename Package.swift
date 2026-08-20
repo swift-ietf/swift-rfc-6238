@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import PackageDescription
 
@@ -13,17 +13,23 @@ extension Target.Dependency {
 let package = Package(
     name: "swift-rfc-6238",
     platforms: [
-        .macOS("27"),
-        .iOS("27"),
-        .tvOS("27"),
-        .watchOS("27")
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
     ],
     products: [
         .library(name: "RFC 6238", targets: ["RFC 6238"])
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-primitives/swift-dependency-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-ascii-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-dependency-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ascii-primitives.git",
+            branch: "main"
+        ),
     ],
     targets: [
         .target(
@@ -36,7 +42,7 @@ let package = Package(
         .testTarget(
             name: "RFC 6238 Tests",
             dependencies: [
-                "RFC 6238",
+                "RFC 6238"
             ]
         ),
     ],
