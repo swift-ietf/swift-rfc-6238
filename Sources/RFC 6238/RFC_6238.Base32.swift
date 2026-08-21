@@ -1,16 +1,11 @@
-// MARK: - Base32 (RFC 4648)
-
 extension RFC_6238 {
-    /// Base32 encoding/decoding per RFC 4648.
+
     public enum Base32 {}
 }
 
 extension RFC_6238.Base32 {
     private static let alphabet: [Character] = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
 
-    /// Decodes a base32-encoded string to bytes.
-    /// - Parameter base32: The base32 encoded string (padding, spaces, dashes tolerated)
-    /// - Returns: Decoded bytes, or nil if the string contains invalid characters.
     public static func decode(_ base32: Swift.String) -> [UInt8]? {
         let cleaned = base32.uppercased().filter { char in
             char != " " && char != "-" && char != "="
@@ -36,9 +31,6 @@ extension RFC_6238.Base32 {
         return output
     }
 
-    /// Encodes bytes to a base32 string with padding.
-    /// - Parameter bytes: The bytes to encode
-    /// - Returns: Base32-encoded string with padding
     public static func encode(_ bytes: [UInt8]) -> Swift.String {
         var result = ""
         var bits = 0

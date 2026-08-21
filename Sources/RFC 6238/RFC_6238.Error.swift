@@ -1,5 +1,5 @@
 extension RFC_6238 {
-    /// Errors that can occur during TOTP/HOTP operations
+
     public enum Error: Swift.Error, Sendable, Equatable {
         case invalidBase32String
         case invalidDigits(Swift.String)
@@ -7,8 +7,6 @@ extension RFC_6238 {
         case emptySecret
     }
 }
-
-// MARK: - Error Description
 
 extension RFC_6238.Error: CustomStringConvertible {
     public var description: Swift.String {

@@ -1,6 +1,3 @@
-// RFC 6238 Tests.swift
-// swift-rfc-6238
-
 import Testing
 
 @testable import RFC_6238
@@ -11,14 +8,8 @@ struct `RFC 6238 Tests` {
     @Suite struct `Edge Case` {}
     @Suite struct Integration {}
 
-    // MARK: - Test HMAC Provider
-
-    /// Mock HMAC provider for testing without crypto dependencies
-    /// Uses test vectors from RFC 6238 Appendix B
     struct TestHMACProvider: RFC_6238.HMACProvider {
     }
-
-    // MARK: - RFC 6238 Test Vectors
 
     @Test
     func `RFC 6238 Test Vectors - SHA1`() throws {
@@ -106,8 +97,6 @@ struct `RFC 6238 Tests` {
         }
     }
 
-    // MARK: - Base32 Tests
-
     @Test
     func `Base32 Encoding`() {
         let testCases: [(String, String)] = [
@@ -139,9 +128,9 @@ struct `RFC 6238 Tests` {
             ("MZXW6YTB", "fooba"),
             ("MZXW6YTBOI======", "foobar"),
             ("JBSWY3DPEBLW64TMMQ======", "Hello World"),
-            // Test without padding
+
             ("MZXW6YTBOI", "foobar"),
-            // Test with spaces and dashes (should be handled)
+
             ("MZXW 6YTB OI", "foobar"),
             ("MZXW-6YTB-OI", "foobar"),
         ]
@@ -175,8 +164,6 @@ struct `RFC 6238 Tests` {
             #expect(originalBytes == decoded)
         }
     }
-
-    // MARK: - TOTP Configuration Tests
 
     @Test
     func `TOTP Initialization`() throws {
@@ -242,26 +229,20 @@ struct `RFC 6238 Tests` {
         let provider = TestHMACProvider()
         let testTime: Double = 1_111_111_111
 
-        // Test exact match
         #expect(totp.validate("14050471", at: testTime, window: 0, using: provider))
 
-        // Test with window
         #expect(totp.validate("14050471", at: testTime, window: 1, using: provider))
 
-        // Test invalid OTP
         #expect(!totp.validate("00000000", at: testTime, window: 1, using: provider))
     }
 
-    // MARK: - Error Handling Tests
-
     @Test
     func `TOTP Initialization Errors`() {
-        // Test empty secret
+
         #expect(throws: RFC_6238.Error.emptySecret) {
             _ = try RFC_6238.TOTP(secret: [])
         }
 
-        // Test invalid digits
         #expect(throws: RFC_6238.Error.self) {
             _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), digits: 5)
         }
@@ -270,7 +251,6 @@ struct `RFC 6238 Tests` {
             _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), digits: 9)
         }
 
-        // Test invalid time step
         #expect(throws: RFC_6238.Error.self) {
             _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: 0)
         }
@@ -279,12 +259,10 @@ struct `RFC 6238 Tests` {
             _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: -10)
         }
 
-        // Test invalid base32
         #expect(throws: RFC_6238.Error.invalidBase32String) {
             _ = try RFC_6238.TOTP(base32Secret: "INVALID!@#$%")
         }
 
-        // Test empty base32
         #expect(throws: RFC_6238.Error.self) {
             _ = try RFC_6238.TOTP(base32Secret: "")
         }
@@ -292,12 +270,11 @@ struct `RFC 6238 Tests` {
 
     @Test
     func `HOTP Initialization Errors`() {
-        // Test empty secret
+
         #expect(throws: RFC_6238.Error.emptySecret) {
             _ = try RFC_6238.HOTP(secret: [])
         }
 
-        // Test invalid digits
         #expect(throws: RFC_6238.Error.self) {
             _ = try RFC_6238.HOTP(secret: [UInt8](repeating: 0, count: 20), digits: 5)
         }
@@ -423,8 +400,6 @@ extension `RFC 6238 Tests`.TestHMACProvider {
         )
     }
 }
-
-// MARK: - Hex Helpers
 
 private func hexBytes(_ hex: String) -> [UInt8]? {
     guard hex.count % 2 == 0 else { return nil }

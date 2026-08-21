@@ -1,9 +1,7 @@
 public import Dependency_Primitives
 
-// MARK: - HMAC Witness + Dependency.Key
-
 extension RFC_6238 {
-    /// Witness struct for HMAC provision, conforming to both HMACProvider and Dependency.Key.
+
     public struct HMAC: Sendable {
         @usableFromInline
         let _hmac: @Sendable (Algorithm, [UInt8], [UInt8]) -> [UInt8]
@@ -34,7 +32,7 @@ extension RFC_6238.HMAC: Dependency.Key {
     #if canImport(CryptoKit)
         public static var liveValue: RFC_6238.HMAC {
             RFC_6238.HMAC { _, _, _ in
-                // Platform-specific: use CryptoKit HMAC
+
                 fatalError(
                     "RFC_6238.HMAC.liveValue: CryptoKit HMAC integration required. "
                         + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
@@ -54,7 +52,7 @@ extension RFC_6238.HMAC: Dependency.Key {
 
     public static var testValue: RFC_6238.HMAC {
         RFC_6238.HMAC { algorithm, key, data in
-            // Deterministic: truncate/pad key+data to expected hash length
+
             let combined = key + data
             var result = [UInt8](repeating: 0, count: algorithm.hashLength)
             (0..<min(combined.count, result.count)).forEach { i in

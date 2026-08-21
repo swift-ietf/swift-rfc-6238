@@ -1,8 +1,3 @@
-// ReadmeVerificationTests.swift
-// swift-rfc-6238
-//
-// Verifies that README code examples actually work
-
 import RFC_6238
 import Testing
 
@@ -42,7 +37,7 @@ struct `README Verification` {
             let hmacProvider = CryptoKitHMACProvider()
             let now =
                 Double(ContinuousClock.now.duration(to: .now).components.seconds)
-                + 978_307_200  // Approximate unix time
+                + 978_307_200
             let otp = totp.generate(at: 1_111_111_111, using: hmacProvider)
 
             #expect(otp.count == 6)
