@@ -1,4 +1,4 @@
-import Dependency_Primitives
+import Dependency
 
 extension RFC_6238 {
 

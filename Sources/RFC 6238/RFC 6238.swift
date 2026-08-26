@@ -1,4 +1,4 @@
-import ASCII_Primitives
+import ASCII
 
 public enum RFC_6238 {}
 
