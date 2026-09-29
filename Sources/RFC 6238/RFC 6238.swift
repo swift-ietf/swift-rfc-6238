@@ -40,5 +40,5 @@ func percentEncode(_ string: Swift.String) -> Swift.String {
 
 private func hexChar(_ nibble: UInt8) -> Character {
 
-    Character(UnicodeScalar(ASCII.Hexadecimal.code(nibble, case: .upper)!))
+    Character(UnicodeScalar(ASCII.Hexadecimal.code(nibble, case: .upper)!.underlying))
 }

@@ -4,7 +4,7 @@ extension RFC_6238 {
 }
 
 extension RFC_6238.Base32 {
-    private static let alphabet: [Character] = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
+    private static let alphabet: [Character] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".map(\.self)
 
     public static func decode(_ base32: Swift.String) -> [UInt8]? {
         let cleaned = base32.uppercased().filter { char in

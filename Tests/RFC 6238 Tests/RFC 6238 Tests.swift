@@ -417,7 +417,7 @@ private func hexBytes(_ hex: String) -> [UInt8]? {
     return result
 }
 
-private let hexChars: [Character] = Array("0123456789abcdef")
+private let hexChars: [Character] = "0123456789abcdef".map(\.self)
 
 private func hexString(_ bytes: [UInt8]) -> String {
     bytes.map { byte in
