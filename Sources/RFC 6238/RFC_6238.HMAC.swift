@@ -1,4 +1,6 @@
 public import Dependency
+internal import Byte
+internal import FIPS_180_4
 
 extension RFC_6238 {
 
@@ -29,26 +31,11 @@ extension RFC_6238.HMAC: RFC_6238.HMACProvider {
 extension RFC_6238.HMAC: Dependency.Key {
     public typealias Value = RFC_6238.HMAC
 
-    #if canImport(CryptoKit)
-        public static var liveValue: RFC_6238.HMAC {
-            RFC_6238.HMAC { _, _, _ in
-
-                fatalError(
-                    "RFC_6238.HMAC.liveValue: CryptoKit HMAC integration required. "
-                        + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
-                )
-            }
+    public static var liveValue: RFC_6238.HMAC {
+        RFC_6238.HMAC { algorithm, key, data in
+            algorithm.authenticationCode(key: key, data: data)
         }
-    #else
-        public static var liveValue: RFC_6238.HMAC {
-            RFC_6238.HMAC { _, _, _ in
-                fatalError(
-                    "RFC_6238.HMAC.liveValue unavailable on this platform. "
-                        + "Inject a provider via Dependency.Scope.with { $0[RFC_6238.HMAC.self] = ... }"
-                )
-            }
-        }
-    #endif
+    }
 
     public static var testValue: RFC_6238.HMAC {
         RFC_6238.HMAC { algorithm, key, data in
@@ -60,5 +47,33 @@ extension RFC_6238.HMAC: Dependency.Key {
             }
             return result
         }
+    }
+}
+
+extension RFC_6238.Algorithm {
+
+    var blockLength: Int {
+        switch self {
+        case .sha1, .sha256: 64
+        case .sha512: 128
+        }
+    }
+
+    func digest(_ bytes: [UInt8]) -> [UInt8] {
+        let input = bytes.map(Byte.init(_:))
+        let digest: FIPS_180_4.Digest =
+            switch self {
+            case .sha1: FIPS_180_4.SHA1.digest(input)
+            case .sha256: FIPS_180_4.SHA256.digest(input)
+            case .sha512: FIPS_180_4.SHA512.digest(input)
+            }
+        return digest.bytes.map(\.underlying)
+    }
+
+    func authenticationCode(key: [UInt8], data: [UInt8]) -> [UInt8] {
+        let shortKey = key.count > blockLength ? digest(key) : key
+        let paddedKey = shortKey + [UInt8](repeating: 0, count: blockLength - shortKey.count)
+        let inner = digest(paddedKey.map { $0 ^ 0x36 } + data)
+        return digest(paddedKey.map { $0 ^ 0x5c } + inner)
     }
 }

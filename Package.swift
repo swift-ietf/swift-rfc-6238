@@ -23,6 +23,14 @@ let package = Package(
             url: "https://github.com/swift-atoms/swift-ascii.git",
             branch: "main"
         ),
+        .package(
+            url: "https://github.com/swift-atoms/swift-byte.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-standards/swift-fips-180-4.git",
+            branch: "main"
+        ),
     ],
     targets: [
         .target(
@@ -30,6 +38,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Dependency", package: "swift-dependency"),
                 .product(name: "ASCII", package: "swift-ascii"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "FIPS 180-4", package: "swift-fips-180-4"),
             ]
         ),
         .testTarget(
