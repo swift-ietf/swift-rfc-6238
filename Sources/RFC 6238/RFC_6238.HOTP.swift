@@ -44,13 +44,13 @@ extension RFC_6238.HOTP {
     public func generate<HMACProvider: RFC_6238.HMACProvider>(
         counter: UInt64,
         using hmacProvider: HMACProvider
-    ) -> Swift.String {
+    ) throws(RFC_6238.Error) -> Swift.String {
 
         let counterBytes: [UInt8] = withUnsafeBytes(of: counter.bigEndian) { unsafe Array($0) }
 
         let hmac = hmacProvider.hmac(algorithm: algorithm, key: secret, data: counterBytes)
 
-        let truncated = dynamicTruncate(hmac)
+        let truncated = try dynamicTruncate(hmac)
 
         var divisor: UInt32 = 1
         for _ in 0..<digits { divisor *= 10 }
@@ -59,16 +59,12 @@ extension RFC_6238.HOTP {
         return zeroPadded(otp, width: digits)
     }
 
-    private func dynamicTruncate(_ hmac: [UInt8]) -> UInt32 {
-        guard hmac.count >= 20 else {
-            fatalError("HMAC too short: \(hmac.count) bytes")
+    private func dynamicTruncate(_ hmac: [UInt8]) throws(RFC_6238.Error) -> UInt32 {
+        guard let last = hmac.last, hmac.count >= 20 else {
+            throw .hmacTooShort(hmac.count)
         }
 
-        let offset = Int(hmac.last! & 0x0f)
-
-        guard offset + 4 <= hmac.count else {
-            fatalError("Invalid offset \(offset) for HMAC length \(hmac.count)")
-        }
+        let offset = Int(last & 0x0f)
 
         var value: UInt32 = 0
         (offset..<(offset + 4)).forEach { i in
@@ -81,7 +77,7 @@ extension RFC_6238.HOTP {
 
 extension RFC_6238.HOTP {
 
-    public func generate(counter: UInt64) -> Swift.String {
-        generate(counter: counter, using: Dependency.Scope.current[RFC_6238.HMAC.self])
+    public func generate(counter: UInt64) throws(RFC_6238.Error) -> Swift.String {
+        try generate(counter: counter, using: Dependency.Scope.current[RFC_6238.HMAC.self])
     }
 }

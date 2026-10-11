@@ -69,10 +69,10 @@ extension RFC_6238.TOTP {
     public func generate<HMACProvider: RFC_6238.HMACProvider>(
         at unixTime: Double,
         using hmacProvider: HMACProvider
-    ) -> Swift.String {
+    ) throws(RFC_6238.Error) -> Swift.String {
         let counter = self.counter(at: unixTime)
         let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
-        return hotp.generate(counter: counter, using: hmacProvider)
+        return try hotp.generate(counter: counter, using: hmacProvider)
     }
 
     public func validate<HMACProvider: RFC_6238.HMACProvider>(
@@ -80,15 +80,17 @@ extension RFC_6238.TOTP {
         at unixTime: Double,
         window: Int = 1,
         using hmacProvider: HMACProvider
-    ) -> Bool {
+    ) throws(RFC_6238.Error) -> Bool {
         let currentCounter = counter(at: unixTime)
 
-        return (-window...window).contains { offset in
+        let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
+        var matched = false
+        for offset in -window...window {
             let testCounter = UInt64(Int64(currentCounter) + Int64(offset))
-            let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
-            let expectedOTP = hotp.generate(counter: testCounter, using: hmacProvider)
-            return constantTimeCompare(otp, expectedOTP)
+            let expectedOTP = try hotp.generate(counter: testCounter, using: hmacProvider)
+            matched = constantTimeCompare(otp, expectedOTP) || matched
         }
+        return matched
     }
 
     public func timeRemaining(at unixTime: Double) -> Double {
@@ -116,16 +118,16 @@ extension RFC_6238.TOTP {
 
 extension RFC_6238.TOTP {
 
-    public func generate(at unixTime: Double) -> Swift.String {
-        generate(at: unixTime, using: Dependency.Scope.current[RFC_6238.HMAC.self])
+    public func generate(at unixTime: Double) throws(RFC_6238.Error) -> Swift.String {
+        try generate(at: unixTime, using: Dependency.Scope.current[RFC_6238.HMAC.self])
     }
 
     public func validate(
         _ otp: Swift.String,
         at unixTime: Double,
         window: Int = 1
-    ) -> Bool {
-        validate(
+    ) throws(RFC_6238.Error) -> Bool {
+        try validate(
             otp,
             at: unixTime,
             window: window,

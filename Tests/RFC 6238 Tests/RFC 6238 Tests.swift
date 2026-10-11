@@ -34,7 +34,7 @@ struct `RFC 6238 Tests` {
         let provider = TestHMACProvider()
 
         for (unixTime, expected) in testCases {
-            let generated = totp.generate(at: unixTime, using: provider)
+            let generated = try totp.generate(at: unixTime, using: provider)
             #expect(generated == expected)
         }
     }
@@ -62,7 +62,7 @@ struct `RFC 6238 Tests` {
         let provider = TestHMACProvider()
 
         for (unixTime, expected) in testCases {
-            let generated = totp.generate(at: unixTime, using: provider)
+            let generated = try totp.generate(at: unixTime, using: provider)
             #expect(generated == expected)
         }
     }
@@ -92,7 +92,7 @@ struct `RFC 6238 Tests` {
         let provider = TestHMACProvider()
 
         for (unixTime, expected) in testCases {
-            let generated = totp.generate(at: unixTime, using: provider)
+            let generated = try totp.generate(at: unixTime, using: provider)
             #expect(generated == expected)
         }
     }
@@ -229,11 +229,11 @@ struct `RFC 6238 Tests` {
         let provider = TestHMACProvider()
         let testTime: Double = 1_111_111_111
 
-        #expect(totp.validate("14050471", at: testTime, window: 0, using: provider))
+        #expect(try totp.validate("14050471", at: testTime, window: 0, using: provider))
 
-        #expect(totp.validate("14050471", at: testTime, window: 1, using: provider))
+        #expect(try totp.validate("14050471", at: testTime, window: 1, using: provider))
 
-        #expect(!totp.validate("00000000", at: testTime, window: 1, using: provider))
+        #expect(try !totp.validate("00000000", at: testTime, window: 1, using: provider))
     }
 
     @Test

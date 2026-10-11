@@ -80,7 +80,7 @@ let totp = try RFC_6238.TOTP(
 
 // Generate current OTP
 let hmacProvider = CryptoKitHMACProvider()
-let otp = totp.generate(using: hmacProvider)
+let otp = try totp.generate(using: hmacProvider)
 print("Current OTP: \(otp)")  // e.g., "123456"
 
 // Check remaining time
@@ -92,12 +92,12 @@ print("Expires in: \(Int(remaining)) seconds")
 
 ```swift
 // Validate OTP with time window (allows ±1 time step)
-let isValid = totp.validate("123456", window: 1, using: hmacProvider)
+let isValid = try totp.validate("123456", window: 1, using: hmacProvider)
 print("Valid: \(isValid)")
 
 // Validate at specific time
 let testDate = Date(timeIntervalSince1970: 1111111109)
-let isValidAtTime = totp.validate("123456", at: testDate, window: 0, using: hmacProvider)
+let isValidAtTime = try totp.validate("123456", at: testDate, window: 0, using: hmacProvider)
 ```
 
 ### Generating Provisioning URIs
@@ -124,7 +124,7 @@ let hotp = try RFC_6238.HOTP(
 )
 
 // Generate OTP for specific counter value
-let counterOTP = hotp.generate(counter: 42, using: hmacProvider)
+let counterOTP = try hotp.generate(counter: 42, using: hmacProvider)
 print("OTP for counter 42: \(counterOTP)")
 ```
 

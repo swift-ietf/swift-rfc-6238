@@ -5,6 +5,7 @@ extension RFC_6238 {
         case invalidDigits(Swift.String)
         case invalidTimeStep(Swift.String)
         case emptySecret
+        case hmacTooShort(Int)
     }
 }
 
@@ -22,6 +23,9 @@ extension RFC_6238.Error: CustomStringConvertible {
 
         case .emptySecret:
             "Secret key cannot be empty"
+
+        case .hmacTooShort(let count):
+            "HMAC too short: \(count) bytes"
         }
     }
 }

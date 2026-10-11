@@ -54,7 +54,7 @@ extension `RFC 6238 Tests` {
                 t0: 0
             )
             for (unixTime, expected) in cases {
-                #expect(totp.generate(at: unixTime, using: RFC_6238.HMAC.liveValue) == expected)
+                #expect(try totp.generate(at: unixTime, using: RFC_6238.HMAC.liveValue) == expected)
             }
         }
 
@@ -66,7 +66,7 @@ extension `RFC 6238 Tests` {
                 "254676", "287922", "162583", "399871", "520489",
             ]
             for (counter, code) in expected.enumerated() {
-                #expect(hotp.generate(counter: UInt64(counter), using: RFC_6238.HMAC.liveValue) == code)
+                #expect(try hotp.generate(counter: UInt64(counter), using: RFC_6238.HMAC.liveValue) == code)
             }
         }
 
@@ -86,6 +86,27 @@ extension `RFC 6238 Tests` {
                 hexString(live.hmac(algorithm: .sha512, key: [UInt8](repeating: 0xaa, count: 131), data: data))
                     == "80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f3526b56d037e05f2598bd0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598"
             )
+        }
+    }
+}
+
+extension `RFC 6238 Tests` {
+
+    @Suite
+    struct `RFC 4226 §5.3 dynamic truncation` {
+
+        struct ShortHMACProvider: RFC_6238.HMACProvider {
+            func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
+                [UInt8](repeating: 0x0f, count: 10)
+            }
+        }
+
+        @Test
+        func `RFC 4226 §5.3 rejects an HMAC shorter than 20 bytes with a typed error`() throws {
+            let hotp = try RFC_6238.HOTP(secret: Array("12345678901234567890".utf8))
+            #expect(throws: RFC_6238.Error.hmacTooShort(10)) {
+                try hotp.generate(counter: 0, using: ShortHMACProvider())
+            }
         }
     }
 }

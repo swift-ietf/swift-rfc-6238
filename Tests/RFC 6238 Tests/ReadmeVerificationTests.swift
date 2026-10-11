@@ -38,7 +38,7 @@ struct `README Verification` {
             let now =
                 Double(ContinuousClock.now.duration(to: .now).components.seconds)
                 + 978_307_200
-            let otp = totp.generate(at: 1_111_111_111, using: hmacProvider)
+            let otp = try totp.generate(at: 1_111_111_111, using: hmacProvider)
 
             #expect(otp.count == 6)
             #expect(otp.allSatisfy { $0.isNumber })
@@ -60,11 +60,11 @@ struct `README Verification` {
             let hmacProvider = CryptoKitHMACProvider()
             let testTime: Double = 1_111_111_109
 
-            let otp = totp.generate(at: testTime, using: hmacProvider)
-            let isValid = totp.validate(otp, at: testTime, window: 1, using: hmacProvider)
+            let otp = try totp.generate(at: testTime, using: hmacProvider)
+            let isValid = try totp.validate(otp, at: testTime, window: 1, using: hmacProvider)
             #expect(isValid)
 
-            let isValidExact = totp.validate(otp, at: testTime, window: 0, using: hmacProvider)
+            let isValidExact = try totp.validate(otp, at: testTime, window: 0, using: hmacProvider)
             #expect(isValidExact)
         }
 
@@ -100,7 +100,7 @@ struct `README Verification` {
                 algorithm: .sha1
             )
 
-            let counterOTP = hotp.generate(counter: 42, using: hmacProvider)
+            let counterOTP = try hotp.generate(counter: 42, using: hmacProvider)
 
             #expect(counterOTP.count == 6)
             #expect(counterOTP.allSatisfy { $0.isNumber })
