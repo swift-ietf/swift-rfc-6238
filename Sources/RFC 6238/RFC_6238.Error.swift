@@ -1,16 +1,16 @@
 extension RFC_6238 {
 
-    public enum Error: Swift.Error, Sendable, Equatable {
+    public enum Error: Swift::Error, Sendable, Equatable {
         case invalidBase32String
-        case invalidDigits(Swift.String)
-        case invalidTimeStep(Swift.String)
+        case invalidDigits(Swift::String)
+        case invalidTimeStep(Swift::String)
         case emptySecret
         case hmacTooShort(Int)
     }
 }
 
 extension RFC_6238.Error: CustomStringConvertible {
-    public var description: Swift.String {
+    public var description: Swift::String {
         switch self {
         case .invalidBase32String:
             "Invalid base32 encoded string"

@@ -6,7 +6,7 @@ extension RFC_6238 {
 extension RFC_6238.Base32 {
     private static let alphabet: [Character] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".map(\.self)
 
-    public static func decode(_ base32: Swift.String) -> [UInt8]? {
+    public static func decode(_ base32: Swift::String) -> [UInt8]? {
         let cleaned = base32.uppercased().filter { char in
             char != " " && char != "-" && char != "="
         }
@@ -31,7 +31,7 @@ extension RFC_6238.Base32 {
         return output
     }
 
-    public static func encode(_ bytes: [UInt8]) -> Swift.String {
+    public static func encode(_ bytes: [UInt8]) -> Swift::String {
         var result = ""
         var bits = 0
         var value = 0

@@ -35,9 +35,6 @@ struct `README Verification` {
             )
 
             let hmacProvider = CryptoKitHMACProvider()
-            let now =
-                Double(ContinuousClock.now.duration(to: .now).components.seconds)
-                + 978_307_200
             let otp = try totp.generate(at: 1_111_111_111, using: hmacProvider)
 
             #expect(otp.count == 6)

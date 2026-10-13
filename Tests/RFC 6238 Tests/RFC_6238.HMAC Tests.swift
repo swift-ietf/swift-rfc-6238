@@ -7,7 +7,7 @@ extension `RFC 6238 Tests` {
     @Suite
     struct `RFC 6238 Appendix B through the live HMAC` {
 
-        static let vectors: [(RFC_6238.Algorithm, Swift.String, [(Double, Swift.String)])] = [
+        static let vectors: [(RFC_6238.Algorithm, Swift::String, [(Double, Swift::String)])] = [
             (
                 .sha1, "12345678901234567890",
                 [

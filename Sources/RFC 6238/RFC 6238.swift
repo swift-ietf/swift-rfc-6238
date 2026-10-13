@@ -2,7 +2,7 @@ import ASCII
 
 public enum RFC_6238 {}
 
-func constantTimeCompare(_ a: Swift.String, _ b: Swift.String) -> Bool {
+func constantTimeCompare(_ a: Swift::String, _ b: Swift::String) -> Bool {
     guard a.count == b.count else { return false }
 
     var result = 0
@@ -13,13 +13,13 @@ func constantTimeCompare(_ a: Swift.String, _ b: Swift.String) -> Bool {
     return result == 0
 }
 
-func zeroPadded(_ value: UInt32, width: Int) -> Swift.String {
-    var s = Swift.String(value)
+func zeroPadded(_ value: UInt32, width: Int) -> Swift::String {
+    var s = Swift::String(value)
     while s.count < width { s = "0" + s }
     return s
 }
 
-func percentEncode(_ string: Swift.String) -> Swift.String {
+func percentEncode(_ string: Swift::String) -> Swift::String {
     var result = ""
     for byte in string.utf8 {
         if (byte >= 0x41 && byte <= 0x5A)

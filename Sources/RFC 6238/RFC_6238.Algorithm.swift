@@ -1,6 +1,6 @@
 extension RFC_6238 {
 
-    public enum Algorithm: Swift.String, Codable, Hashable, CaseIterable, Sendable {
+    public enum Algorithm: Swift::String, Codable, Hashable, CaseIterable, Sendable {
         case sha1 = "SHA1"
         case sha256 = "SHA256"
         case sha512 = "SHA512"

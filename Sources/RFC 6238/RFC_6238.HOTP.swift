@@ -44,7 +44,7 @@ extension RFC_6238.HOTP {
     public func generate<HMACProvider: RFC_6238.HMACProvider>(
         counter: UInt64,
         using hmacProvider: HMACProvider
-    ) throws(RFC_6238.Error) -> Swift.String {
+    ) throws(RFC_6238.Error) -> Swift::String {
 
         let counterBytes: [UInt8] = withUnsafeBytes(of: counter.bigEndian) { unsafe Array($0) }
 
@@ -77,7 +77,7 @@ extension RFC_6238.HOTP {
 
 extension RFC_6238.HOTP {
 
-    public func generate(counter: UInt64) throws(RFC_6238.Error) -> Swift.String {
+    public func generate(counter: UInt64) throws(RFC_6238.Error) -> Swift::String {
         try generate(counter: counter, using: Dependency.Scope.current[RFC_6238.HMAC.self])
     }
 }
