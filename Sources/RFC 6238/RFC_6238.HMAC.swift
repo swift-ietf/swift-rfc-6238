@@ -1,5 +1,5 @@
-public import Dependency
 internal import Byte
+public import Dependency
 internal import FIPS_180_4
 
 extension RFC_6238 {

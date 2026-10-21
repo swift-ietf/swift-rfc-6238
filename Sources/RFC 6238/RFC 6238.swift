@@ -40,5 +40,8 @@ func percentEncode(_ string: Swift::String) -> Swift::String {
 
 private func hexChar(_ nibble: UInt8) -> Character {
 
-    Character(UnicodeScalar(ASCII.Hexadecimal.code(nibble, case: .upper)!.underlying))
+    guard let code = ASCII.Hexadecimal.code(nibble, case: .upper) else {
+        preconditionFailure("A nibble (0...15) always has a hexadecimal digit")
+    }
+    return Character(UnicodeScalar(code.underlying))
 }
