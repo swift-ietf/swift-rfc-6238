@@ -2,7 +2,7 @@ import Testing
 
 @testable import RFC_6238
 
-extension `RFC 6238 Tests` {
+extension `RFC 6238 Tests`.`RFC 6238 Tests` {
 
     @Suite
     struct `RFC 6238 Appendix B through the live HMAC` {
@@ -90,7 +90,7 @@ extension `RFC 6238 Tests` {
     }
 }
 
-extension `RFC 6238 Tests` {
+extension `RFC 6238 Tests`.`RFC 6238 Tests` {
 
     @Suite
     struct `RFC 4226 §5.3 dynamic truncation` {
