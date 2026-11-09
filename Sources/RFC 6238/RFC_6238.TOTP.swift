@@ -30,6 +30,9 @@ extension RFC_6238 {
             guard timeStep > 0 else {
                 throw Error.invalidTimeStep("Time step must be positive, got \(timeStep)")
             }
+            guard timeStep == timeStep.rounded(), timeStep < 0x1p63 else {
+                throw Error.invalidTimeStep("Time step must be a whole number of seconds, got \(timeStep)")
+            }
 
             self.secret = secret
             self.timeStep = timeStep
@@ -62,15 +65,19 @@ extension RFC_6238 {
 
 extension RFC_6238.TOTP {
 
-    public func counter(at unixTime: Double) -> UInt64 {
-        UInt64((unixTime - t0) / timeStep)
+    public func counter(at unixTime: Double) throws(RFC_6238.Error) -> UInt64 {
+        let steps = ((unixTime - t0) / timeStep).rounded(.down)
+        guard steps >= 0, steps < 0x1p64 else {
+            throw RFC_6238.Error.invalidTime("Time \(unixTime) is outside the counter range for t0 \(t0)")
+        }
+        return UInt64(steps)
     }
 
     public func generate<HMACProvider: RFC_6238.HMACProvider>(
         at unixTime: Double,
         using hmacProvider: HMACProvider
     ) throws(RFC_6238.Error) -> Swift::String {
-        let counter = self.counter(at: unixTime)
+        let counter = try self.counter(at: unixTime)
         let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
         return try hotp.generate(counter: counter, using: hmacProvider)
     }
@@ -81,12 +88,14 @@ extension RFC_6238.TOTP {
         window: Int = 1,
         using hmacProvider: HMACProvider
     ) throws(RFC_6238.Error) -> Bool {
-        let currentCounter = counter(at: unixTime)
+        let currentCounter = try counter(at: unixTime)
+        let span = UInt64(max(window, 0))
+        let lower = currentCounter >= span ? currentCounter - span : 0
+        let upper = UInt64.max - currentCounter >= span ? currentCounter + span : UInt64.max
 
         let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
         var matched = false
-        for offset in -window...window {
-            let testCounter = UInt64(Int64(currentCounter) + Int64(offset))
+        for testCounter in lower...upper {
             let expectedOTP = try hotp.generate(counter: testCounter, using: hmacProvider)
             matched = constantTimeCompare(otp, expectedOTP) || matched
         }
@@ -104,7 +113,7 @@ extension RFC_6238.TOTP {
     ) -> Swift::String {
         let encodedLabel = percentEncode(label)
         var uri = "otpauth://totp/\(encodedLabel)"
-        uri += "?secret=\(RFC_6238.Base32.encode(secret))"
+        uri += "?secret=\(RFC_6238.Base32.encode(secret).filter { $0 != "=" })"
 
         uri += "&algorithm=\(algorithm.rawValue.uppercased())"
         uri += "&digits=\(digits)"

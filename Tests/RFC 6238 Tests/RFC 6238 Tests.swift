@@ -197,12 +197,65 @@ struct `RFC 6238 Tests` {
         let secret = [UInt8](repeating: 0, count: 20)
         let totp = try RFC_6238.TOTP(secret: secret, timeStep: 30)
 
-        #expect(totp.counter(at: 0) == 0)
-        #expect(totp.counter(at: 29) == 0)
-        #expect(totp.counter(at: 30) == 1)
-        #expect(totp.counter(at: 59) == 1)
-        #expect(totp.counter(at: 60) == 2)
-        #expect(totp.counter(at: 1_111_111_111) == 37_037_037)
+        #expect(try totp.counter(at: 0) == 0)
+        #expect(try totp.counter(at: 29) == 0)
+        #expect(try totp.counter(at: 30) == 1)
+        #expect(try totp.counter(at: 59) == 1)
+        #expect(try totp.counter(at: 60) == 2)
+        #expect(try totp.counter(at: 1_111_111_111) == 37_037_037)
+    }
+
+    @Test
+    func `Counter Before t0 Throws`() throws {
+        let totp = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: 30, t0: 100)
+
+        #expect(try totp.counter(at: 100) == 0)
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try totp.counter(at: 99)
+        }
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try totp.counter(at: -1_000)
+        }
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try totp.counter(at: .nan)
+        }
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try totp.generate(at: 0, using: CounterEchoHMACProvider())
+        }
+    }
+
+    @Test
+    func `Validate Clamps Window At Counter Zero`() throws {
+        let totp = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: 30)
+        let provider = CounterEchoHMACProvider()
+
+        #expect(try totp.generate(at: 0, using: provider) == "000000")
+        #expect(try totp.generate(at: 30, using: provider) == "843009")
+        #expect(try totp.validate("000000", at: 0, window: 1, using: provider))
+        #expect(try totp.validate("843009", at: 0, window: 1, using: provider))
+        #expect(try !totp.validate("843009", at: 0, window: 0, using: provider))
+        #expect(try totp.validate("000000", at: 0, window: 5, using: provider))
+        #expect(try totp.validate("000000", at: 30, window: 1, using: provider))
+    }
+
+    @Test
+    func `Provisioning URI Secret Has No Padding`() throws {
+        let totp = try RFC_6238.TOTP(secret: Array("a".utf8))
+
+        let uri = totp.provisioningURI(label: "user")
+
+        #expect(uri.contains("secret=ME&"))
+        #expect(!uri.contains("secret=ME="))
+    }
+
+    @Test
+    func `Fractional Time Step Throws`() {
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: 30.5)
+        }
+        #expect(throws: RFC_6238.Error.self) {
+            _ = try RFC_6238.TOTP(secret: [UInt8](repeating: 0, count: 20), timeStep: .infinity)
+        }
     }
 
     @Test
@@ -398,6 +451,12 @@ extension `RFC 6238 Tests`.TestHMACProvider {
         fatalError(
             "Unknown test vector: key=\(hexString(key)), algorithm=\(algorithm), data=\(hexString(data))"
         )
+    }
+}
+
+struct CounterEchoHMACProvider: RFC_6238.HMACProvider {
+    func hmac(algorithm: RFC_6238.Algorithm, key: [UInt8], data: [UInt8]) -> [UInt8] {
+        [UInt8](repeating: data.last ?? 0, count: 20)
     }
 }
 
