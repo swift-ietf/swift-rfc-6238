@@ -1,13 +1,12 @@
 # swift-rfc-6238
 
-Use this package when you need time-based or counter-based one-time passwords, the six-to-eight digit codes of authenticator apps, either to generate them or to check a code a user typed. Start from `RFC_6238.TOTP` for time-based codes and `RFC_6238.HOTP` for counter-based ones.
+Use this package for time-based one-time passwords (TOTP), the codes of authenticator apps, either to generate them or to check one a person typed. Start from `RFC_6238.TOTP`. It is HOTP from swift-rfc-4226 with the number of time steps as the counter.
 
 ## Laws
 
-- Codes match the test vectors of RFC 6238 Appendix B and RFC 4226 Appendix D with the built-in HMAC. It is HMAC as in RFC 2104, over SHA-1, SHA-256 or SHA-512, and hashes a key longer than the block size first.
-- A code is always exactly `digits` characters long, with leading zeros kept.
-- The time step counter is the whole number of steps since `t0`, so with 30-second steps the times 30 to 59 share counter 1. `RFC_6238.TOTP.timeRemaining(at:)` gives a full step, not zero, at a step boundary.
-- `RFC_6238.TOTP.validate(_:at:window:)` accepts a code from any step within `window` steps before or after the current one, one step by default. It compares in constant time and checks every step in the window, even after a match.
-- A Base32 secret is read case-insensitively, and spaces, hyphens and padding are ignored.
-- A custom `RFC_6238.HMACProvider` must return at least 20 bytes. A shorter result fails code generation.
-- `RFC_6238.TOTP.provisioningURI(label:issuer:)` writes an otpauth URI with the secret in Base32 and the algorithm, digits and period. Label and issuer are percent-encoded except for unreserved characters and the at sign, so a space becomes `%20`. The period is written in whole seconds.
+- Codes and step counts match RFC 6238 Appendix B for HMAC-SHA-1, -256 and -512.
+- Times are Unix times in whole seconds. The step count is the number of whole steps since `t0`, so with 30-second steps the times 30 to 59 share step 1. A time before `t0` is refused, never clamped.
+- The defaults are those authenticator apps expect: HMAC-SHA-1, 6 digits, 30-second steps from the Unix epoch.
+- `validate(_:at:window:)` accepts a code from any step within `window` steps of the current one, one by default, and returns that step. Storing it and refusing any code whose step is not later stops a code being used twice. The window stops at `t0` and at the largest step, and every step in it is compared.
+- `secondsRemaining(at:)` is a full step, never zero, at a step boundary.
+- Secrets are bytes. Reading a Base32 secret is swift-rfc-4648's job, and the `otpauth` URI that authenticator apps scan is not part of RFC 6238.

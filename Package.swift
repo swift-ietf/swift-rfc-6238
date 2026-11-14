@@ -12,23 +12,11 @@ let package = Package(
         .visionOS(.v27),
     ],
     products: [
-        .library(name: "RFC 6238", targets: ["RFC 6238"])
+        .library(name: "RFC 6238", targets: ["RFC 6238"]),
     ],
     dependencies: [
         .package(
-            url: "https://github.com/swift-atoms/swift-dependency.git",
-            branch: "main"
-        ),
-        .package(
-            url: "https://github.com/swift-atoms/swift-ascii.git",
-            branch: "main"
-        ),
-        .package(
-            url: "https://github.com/swift-atoms/swift-byte.git",
-            branch: "main"
-        ),
-        .package(
-            url: "https://github.com/swift-standards/swift-fips-180-4.git",
+            url: "https://github.com/swift-ietf/swift-rfc-4226.git",
             branch: "main"
         ),
     ],
@@ -36,16 +24,13 @@ let package = Package(
         .target(
             name: "RFC 6238",
             dependencies: [
-                .product(name: "Dependency", package: "swift-dependency"),
-                .product(name: "ASCII", package: "swift-ascii"),
-                .product(name: "Byte", package: "swift-byte"),
-                .product(name: "FIPS 180-4", package: "swift-fips-180-4"),
+                .product(name: "RFC 4226", package: "swift-rfc-4226"),
             ]
         ),
         .testTarget(
             name: "RFC 6238 Tests",
             dependencies: [
-                .target(name: "RFC 6238")
+                .target(name: "RFC 6238"),
             ]
         ),
     ],

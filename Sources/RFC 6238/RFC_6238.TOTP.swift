@@ -1,146 +1,74 @@
-import Dependency
-
 extension RFC_6238 {
 
-    public struct TOTP: Codable, Hashable, Sendable {
+    /// A TOTP generator (section 4): HOTP whose counter is the number of whole time steps since `T0`.
+    ///
+    /// Times are Unix times in whole seconds.
+    public struct TOTP: Sendable {
 
-        public let secret: [UInt8]
+        /// The HOTP generator the codes come from.
+        public let hotp: RFC_4226.HOTP
 
-        public let timeStep: Double
-
-        public let digits: Int
-
+        /// The hash of HMAC.
         public let algorithm: Algorithm
 
-        public let t0: Double
+        /// `X`: the length of one time step, in seconds.
+        public let timeStep: UInt64
 
+        /// `T0`: the Unix time at which counting starts.
+        public let t0: Int64
+
+        /// A generator; the defaults are those of section 4.1 and of authenticator apps: 30-second steps from the Unix
+        /// epoch, 6 digits, HMAC-SHA-1.
         public init(
             secret: [UInt8],
-            timeStep: Double = 30,
+            timeStep: UInt64 = 30,
             digits: Int = 6,
             algorithm: Algorithm = .sha1,
-            t0: Double = 0
-        ) throws(Error) {
-            guard !secret.isEmpty else {
-                throw Error.emptySecret
+            t0: Int64 = 0
+        ) throws(RFC_6238.Error) {
+            guard timeStep > 0 else { throw .timeStep }
+            do {
+                self.hotp = try RFC_4226.HOTP(secret: secret, digits: digits, hash: algorithm.hash)
+            } catch {
+                throw .hotp(error)
             }
-            guard (6...8).contains(digits) else {
-                throw Error.invalidDigits("Digits must be between 6 and 8, got \(digits)")
-            }
-            guard timeStep > 0 else {
-                throw Error.invalidTimeStep("Time step must be positive, got \(timeStep)")
-            }
-            guard timeStep == timeStep.rounded(), timeStep < 0x1p63 else {
-                throw Error.invalidTimeStep("Time step must be a whole number of seconds, got \(timeStep)")
-            }
-
-            self.secret = secret
-            self.timeStep = timeStep
-            self.digits = digits
             self.algorithm = algorithm
+            self.timeStep = timeStep
             self.t0 = t0
         }
-
-        public init(
-            base32Secret: Swift::String,
-            timeStep: Double = 30,
-            digits: Int = 6,
-            algorithm: Algorithm = .sha1,
-            t0: Double = 0
-        ) throws(Error) {
-            guard let secret = Base32.decode(base32Secret) else {
-                throw Error.invalidBase32String
-            }
-
-            try self.init(
-                secret: secret,
-                timeStep: timeStep,
-                digits: digits,
-                algorithm: algorithm,
-                t0: t0
-            )
-        }
     }
 }
 
 extension RFC_6238.TOTP {
 
-    public func counter(at unixTime: Double) throws(RFC_6238.Error) -> UInt64 {
-        let steps = ((unixTime - t0) / timeStep).rounded(.down)
-        guard steps >= 0, steps < 0x1p64 else {
-            throw RFC_6238.Error.invalidTime("Time \(unixTime) is outside the counter range for t0 \(t0)")
-        }
-        return UInt64(steps)
+    /// `T`: the number of whole time steps between `T0` and `time` (section 4.2).
+    public func counter(at time: Int64) throws(RFC_6238.Error) -> UInt64 {
+        guard time >= t0 else { throw .beforeT0(time) }
+        let elapsed = UInt64(bitPattern: time &- t0)
+        return elapsed / timeStep
     }
 
-    public func generate<HMACProvider: RFC_6238.HMACProvider>(
-        at unixTime: Double,
-        using hmacProvider: HMACProvider
-    ) throws(RFC_6238.Error) -> Swift::String {
-        let counter = try self.counter(at: unixTime)
-        let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
-        return try hotp.generate(counter: counter, using: hmacProvider)
+    /// The code at `time`.
+    public func code(at time: Int64) throws(RFC_6238.Error) -> String {
+        hotp.code(counter: try counter(at: time))
     }
 
-    public func validate<HMACProvider: RFC_6238.HMACProvider>(
-        _ otp: Swift::String,
-        at unixTime: Double,
-        window: Int = 1,
-        using hmacProvider: HMACProvider
-    ) throws(RFC_6238.Error) -> Bool {
-        let currentCounter = try counter(at: unixTime)
-        let span = UInt64(max(window, 0))
-        let lower = currentCounter >= span ? currentCounter - span : 0
-        let upper = UInt64.max - currentCounter >= span ? currentCounter + span : UInt64.max
-
-        let hotp = RFC_6238.HOTP(validatedSecret: secret, digits: digits, algorithm: algorithm)
-        var matched = false
-        for testCounter in lower...upper {
-            let expectedOTP = try hotp.generate(counter: testCounter, using: hmacProvider)
-            matched = constantTimeCompare(otp, expectedOTP) || matched
-        }
-        return matched
+    /// The step whose code is `code`, among the current step and `window` steps before and after it, or `nil` when
+    /// none matches (section 5.2).
+    ///
+    /// The window never reaches before `T0`. Every step in it is compared, whether or not one matched. A server
+    /// stores the returned step and refuses any code whose step is not later, so that no code is accepted twice.
+    public func validate(_ code: String, at time: Int64, window: UInt64 = 1) throws(RFC_6238.Error) -> UInt64? {
+        let current = try counter(at: time)
+        let first = current >= window ? current - window : 0
+        let span = current - first + (UInt64.max - current >= window ? window : UInt64.max - current)
+        return hotp.validate(code, counter: first, lookAhead: span)
     }
 
-    public func timeRemaining(at unixTime: Double) -> Double {
-        let elapsedInStep = (unixTime - t0).truncatingRemainder(dividingBy: timeStep)
-        return timeStep - elapsedInStep
-    }
-
-    public func provisioningURI(
-        label: Swift::String,
-        issuer: Swift::String? = nil
-    ) -> Swift::String {
-        let encodedLabel = percentEncode(label)
-        var uri = "otpauth://totp/\(encodedLabel)"
-        uri += "?secret=\(RFC_6238.Base32.encode(secret).filter { $0 != "=" })"
-
-        uri += "&algorithm=\(algorithm.rawValue.uppercased())"
-        uri += "&digits=\(digits)"
-        uri += "&period=\(Int(timeStep))"
-        if let issuer {
-            uri += "&issuer=\(percentEncode(issuer))"
-        }
-        return uri
-    }
-}
-
-extension RFC_6238.TOTP {
-
-    public func generate(at unixTime: Double) throws(RFC_6238.Error) -> Swift::String {
-        try generate(at: unixTime, using: Dependency.Scope.current[RFC_6238.HMAC.self])
-    }
-
-    public func validate(
-        _ otp: Swift::String,
-        at unixTime: Double,
-        window: Int = 1
-    ) throws(RFC_6238.Error) -> Bool {
-        try validate(
-            otp,
-            at: unixTime,
-            window: window,
-            using: Dependency.Scope.current[RFC_6238.HMAC.self]
-        )
+    /// The seconds from `time` until the next step begins: `timeStep` at the very start of a step.
+    public func secondsRemaining(at time: Int64) throws(RFC_6238.Error) -> UInt64 {
+        guard time >= t0 else { throw .beforeT0(time) }
+        let elapsed = UInt64(bitPattern: time &- t0)
+        return timeStep - elapsed % timeStep
     }
 }
