@@ -1,6 +1,5 @@
-import Testing
-
 import RFC_6238
+import Testing
 
 @Suite
 struct `RFC 6238 Tests` {
@@ -45,7 +44,7 @@ struct `RFC 6238 Tests` {
     @Test
     func `Appendix B step counts`() throws {
         let totp = try RFC_6238.TOTP(secret: Array("12345678901234567890".utf8))
-        let counters: [UInt64] = [0x1, 0x23523EC, 0x23523ED, 0x273EF07, 0x3F940AA, 0x27BC86AA]
+        let counters: [UInt64] = [0x1, 0x23523EC, 0x23523ED, 0x273EF07, 0x3F940AA, 0x27BC_86AA]
         for (time, counter) in zip(Self.times, counters) {
             #expect(try totp.counter(at: time) == counter)
         }

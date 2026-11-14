@@ -12,25 +12,25 @@ let package = Package(
         .visionOS(.v27),
     ],
     products: [
-        .library(name: "RFC 6238", targets: ["RFC 6238"]),
+        .library(name: "RFC 6238", targets: ["RFC 6238"])
     ],
     dependencies: [
         .package(
             url: "https://github.com/swift-ietf/swift-rfc-4226.git",
             branch: "main"
-        ),
+        )
     ],
     targets: [
         .target(
             name: "RFC 6238",
             dependencies: [
-                .product(name: "RFC 4226", package: "swift-rfc-4226"),
+                .product(name: "RFC 4226", package: "swift-rfc-4226")
             ]
         ),
         .testTarget(
             name: "RFC 6238 Tests",
             dependencies: [
-                .target(name: "RFC 6238"),
+                .target(name: "RFC 6238")
             ]
         ),
     ],
