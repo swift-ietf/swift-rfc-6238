@@ -1,10 +1,10 @@
-extension RFC_6238 {
+extension IETF.RFC.`6238` {
 
     /// Why a TOTP generator cannot be made, or cannot give a code at a time.
     public enum Error: Swift.Error, Sendable, Equatable {
 
         /// The secret or the number of digits is refused by HOTP.
-        case hotp(RFC_4226.Error)
+        case hotp(IETF.RFC.`4226`.Error)
 
         /// The time step `X` is zero.
         case timeStep

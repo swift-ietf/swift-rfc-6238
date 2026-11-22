@@ -1,4 +1,4 @@
-extension RFC_6238 {
+extension IETF.RFC.`6238` {
 
     /// A TOTP generator (section 4): HOTP whose counter is the number of whole time steps since `T0`.
     ///
@@ -6,7 +6,7 @@ extension RFC_6238 {
     public struct TOTP: Sendable {
 
         /// The HOTP generator the codes come from.
-        public let hotp: RFC_4226.HOTP
+        public let hotp: IETF.RFC.`4226`.HOTP
 
         /// The hash of HMAC.
         public let algorithm: Algorithm
@@ -25,10 +25,10 @@ extension RFC_6238 {
             digits: Int = 6,
             algorithm: Algorithm = .sha1,
             t0: Int64 = 0
-        ) throws(RFC_6238.Error) {
+        ) throws(IETF.RFC.`6238`.Error) {
             guard timeStep > 0 else { throw .timeStep }
             do {
-                self.hotp = try RFC_4226.HOTP(secret: secret, digits: digits, hash: algorithm.hash)
+                self.hotp = try IETF.RFC.`4226`.HOTP(secret: secret, digits: digits, hash: algorithm.hash)
             } catch {
                 throw .hotp(error)
             }
@@ -39,17 +39,17 @@ extension RFC_6238 {
     }
 }
 
-extension RFC_6238.TOTP {
+extension IETF.RFC.`6238`.TOTP {
 
     /// `T`: the number of whole time steps between `T0` and `time` (section 4.2).
-    public func counter(at time: Int64) throws(RFC_6238.Error) -> UInt64 {
+    public func counter(at time: Int64) throws(IETF.RFC.`6238`.Error) -> UInt64 {
         guard time >= t0 else { throw .beforeT0(time) }
         let elapsed = UInt64(bitPattern: time &- t0)
         return elapsed / timeStep
     }
 
     /// The code at `time`.
-    public func code(at time: Int64) throws(RFC_6238.Error) -> String {
+    public func code(at time: Int64) throws(IETF.RFC.`6238`.Error) -> String {
         hotp.code(counter: try counter(at: time))
     }
 
@@ -58,7 +58,7 @@ extension RFC_6238.TOTP {
     ///
     /// The window never reaches before `T0`. Every step in it is compared, whether or not one matched. A server
     /// stores the returned step and refuses any code whose step is not later, so that no code is accepted twice.
-    public func validate(_ code: String, at time: Int64, window: UInt64 = 1) throws(RFC_6238.Error) -> UInt64? {
+    public func validate(_ code: String, at time: Int64, window: UInt64 = 1) throws(IETF.RFC.`6238`.Error) -> UInt64? {
         let current = try counter(at: time)
         let first = current >= window ? current - window : 0
         let span = current - first + (UInt64.max - current >= window ? window : UInt64.max - current)
@@ -66,7 +66,7 @@ extension RFC_6238.TOTP {
     }
 
     /// The seconds from `time` until the next step begins: `timeStep` at the very start of a step.
-    public func secondsRemaining(at time: Int64) throws(RFC_6238.Error) -> UInt64 {
+    public func secondsRemaining(at time: Int64) throws(IETF.RFC.`6238`.Error) -> UInt64 {
         guard time >= t0 else { throw .beforeT0(time) }
         let elapsed = UInt64(bitPattern: time &- t0)
         return timeStep - elapsed % timeStep

@@ -1,6 +1,6 @@
 # swift-rfc-6238
 
-Use this package for time-based one-time passwords (TOTP), the codes of authenticator apps, either to generate them or to check one a person typed. Start from `RFC_6238.TOTP`. It is HOTP from swift-rfc-4226 with the number of time steps as the counter.
+Use this package for time-based one-time passwords (TOTP), the codes of authenticator apps, either to generate them or to check one a person typed. Start from `IETF.RFC.`6238`.TOTP`. It is HOTP from swift-rfc-4226 with the number of time steps as the counter.
 
 ## Laws
 
