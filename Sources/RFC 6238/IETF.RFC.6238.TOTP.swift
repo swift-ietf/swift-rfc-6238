@@ -27,7 +27,7 @@ extension IETF.RFC.`6238` {
             t0: Int64 = 0
         ) throws(IETF.RFC.`6238`.Error) {
             guard timeStep > 0 else { throw .timeStep }
-            do {
+            do throws(IETF.RFC.`4226`.Error) {
                 self.hotp = try IETF.RFC.`4226`.HOTP(secret: secret, digits: digits, hash: algorithm.hash)
             } catch {
                 throw .hotp(error)
